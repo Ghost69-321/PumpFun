@@ -18,7 +18,7 @@ import Link from 'next/link';
 
 export function WalletButton() {
   const { data: session } = useSession();
-  const { connected, publicKey, disconnect } = useWallet();
+  const { disconnect } = useWallet();
   const [loginOpen, setLoginOpen] = useState(false);
 
   const handleDisconnect = async () => {

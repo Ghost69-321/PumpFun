@@ -5,7 +5,6 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { signIn } from 'next-auth/react';
 import { Dialog } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 
 interface LoginModalProps {
@@ -14,7 +13,7 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ open, onClose }: LoginModalProps) {
-  const { connected, publicKey, connecting, wallet } = useWallet();
+  const { connected, publicKey, connecting } = useWallet();
   const { setVisible } = useWalletModal();
   const { toast } = useToast();
 

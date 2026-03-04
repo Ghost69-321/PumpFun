@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { WalletButton } from '@/components/auth/WalletButton';
 import { SearchBar } from '@/components/feed/SearchBar';
-import { cn } from '@/lib/utils';
 import { APP_NAME } from '@/lib/constants';
 
 export function Header() {

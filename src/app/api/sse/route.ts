@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { SSE_HEARTBEAT_INTERVAL } from '@/lib/constants';
 import { addSSEClient, removeSSEClient } from '@/lib/sse-clients';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
