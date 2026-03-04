@@ -1,0 +1,92 @@
+# Production Docker Compose
+# Usage: docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+#
+# Required env vars (set in .env.production — see .env.production.template):
+#   APP_IMAGE, DATABASE_URL, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB,
+#   NEXTAUTH_SECRET, NEXTAUTH_URL, NEXT_PUBLIC_SOLANA_RPC_URL,
+#   NEXT_PUBLIC_SOLANA_NETWORK, PLATFORM_WALLET_ADDRESS,
+#   PLATFORM_FEE_PERCENT, GRADUATION_THRESHOLD_SOL,
+#   NEXT_PUBLIC_PLATFORM_FEE_BPS, NEXT_PUBLIC_APP_URL, UPLOAD_DIR
+
+services:
+  app:
+    image: ${APP_IMAGE:-ghcr.io/ghost69-321/pumpfun:latest}
+    ports:
+      # Only the app is exposed — db and redis stay internal
+      - "3000:3000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXT_PUBLIC_SOLANA_RPC_URL: ${NEXT_PUBLIC_SOLANA_RPC_URL}
+      NEXT_PUBLIC_SOLANA_NETWORK: ${NEXT_PUBLIC_SOLANA_NETWORK:-mainnet-beta}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      PLATFORM_WALLET_ADDRESS: ${PLATFORM_WALLET_ADDRESS:-CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw}
+      PLATFORM_FEE_PERCENT: ${PLATFORM_FEE_PERCENT:-1}
+      GRADUATION_THRESHOLD_SOL: ${GRADUATION_THRESHOLD_SOL:-85}
+      NEXT_PUBLIC_PLATFORM_FEE_BPS: ${NEXT_PUBLIC_PLATFORM_FEE_BPS:-100}
+      UPLOAD_DIR: ${UPLOAD_DIR:-./public/uploads}
+    volumes:
+      # Persist user-uploaded files across container restarts
+      - uploads:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - internal
+      - external
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pumpfun}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-pumpfun}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # No ports exposed to the host — only reachable on the internal network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pumpfun}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    # No ports exposed to the host — only reachable on the internal network
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - internal
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:
+
+networks:
+  # Internal network: only db, redis, and app communicate here
+  internal:
+    driver: bridge
+    internal: true
+  # External network: app is reachable from the host / Nginx
+  external:
+    driver: bridge
