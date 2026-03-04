@@ -3,14 +3,15 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const token = await prisma.token.findFirst({
       where: {
         OR: [
-          { id: params.id },
-          { mintAddress: params.id },
+          { id },
+          { mintAddress: id },
         ],
       },
       include: {

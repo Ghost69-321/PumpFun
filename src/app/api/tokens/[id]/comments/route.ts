@@ -3,11 +3,12 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const comments = await prisma.comment.findMany({
-      where: { tokenId: params.id },
+      where: { tokenId: id },
       include: {
         user: {
           select: { id: true, username: true, walletAddress: true, avatar: true },
@@ -24,9 +25,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { content, walletAddress } = body;
 
@@ -46,7 +48,7 @@ export async function POST(
 
     const comment = await prisma.comment.create({
       data: {
-        tokenId: params.id,
+        tokenId: id,
         userId: user.id,
         content,
       },
