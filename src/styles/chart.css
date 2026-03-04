@@ -1,0 +1,33 @@
+/* Chart container styles */
+.chart-container {
+  width: 100%;
+  height: 320px;
+  background-color: #111111;
+}
+
+.chart-container canvas {
+  display: block;
+}
+
+/* Lightweight Charts custom tooltip */
+.lw-chart-tooltip {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #888888;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.lw-chart-tooltip .price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #00ff88;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.lw-chart-tooltip .label {
+  color: #555555;
+  font-size: 11px;
+}
