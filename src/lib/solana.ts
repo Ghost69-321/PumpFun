@@ -1,8 +1,19 @@
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import {
+  Connection,
+  PublicKey,
+  SystemProgram,
+  TransactionInstruction,
+  clusterApiUrl,
+} from '@solana/web3.js';
+import { TREASURY_WALLET } from './constants';
+
+const SOLANA_NETWORK = (process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'mainnet-beta') as
+  | 'devnet'
+  | 'testnet'
+  | 'mainnet-beta';
 
 const SOLANA_RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
-  clusterApiUrl('devnet');
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl(SOLANA_NETWORK);
 
 export const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
 
@@ -53,4 +64,18 @@ export function isValidSolanaAddress(address: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Build a SOL transfer instruction that sends fees to the treasury wallet.
+ */
+export function buildFeeTransferInstruction(
+  fromPubkey: PublicKey,
+  lamports: number
+): TransactionInstruction {
+  return SystemProgram.transfer({
+    fromPubkey,
+    toPubkey: new PublicKey(TREASURY_WALLET),
+    lamports,
+  });
 }

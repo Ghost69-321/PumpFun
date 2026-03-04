@@ -1,0 +1,14 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npx prisma generate && next build",
+  "outputDirectory": ".next",
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "NEXTAUTH_URL": "@nextauth-url",
+    "SOLANA_RPC_URL": "@solana-rpc-url",
+    "NEXT_PUBLIC_SOLANA_RPC_URL": "@next-public-solana-rpc-url",
+    "NEXT_PUBLIC_SOLANA_NETWORK": "mainnet-beta",
+    "PLATFORM_WALLET_ADDRESS": "CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw"
+  }
+}

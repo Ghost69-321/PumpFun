@@ -10,7 +10,7 @@ import {
   calculateMarketCap,
   GRADUATION_SOL,
 } from '@/lib/bonding-curve';
-import { TOTAL_SUPPLY } from '@/lib/constants';
+import { TOTAL_SUPPLY, TREASURY_WALLET, PLATFORM_FEE_RATE } from '@/lib/constants';
 import { broadcastSSEEvent } from '@/lib/sse-clients';
 
 export async function POST(req: NextRequest) {
@@ -226,10 +226,17 @@ export async function POST(req: NextRequest) {
       circulatingSupply: newCirculatingSupply,
     });
 
+    // Calculate fee for response
+    const fee = type === 'BUY'
+      ? actualAmountSol * PLATFORM_FEE_RATE
+      : (actualAmountSol / (1 - PLATFORM_FEE_RATE)) * PLATFORM_FEE_RATE;
+
     return NextResponse.json({
       ...result.trade,
       newPrice,
       newMarketCap,
+      fee,
+      treasuryWallet: TREASURY_WALLET,
     });
   } catch (error) {
     console.error('POST /api/trade error:', error);

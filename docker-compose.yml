@@ -1,0 +1,53 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://pumpfun:pumpfun@db:5432/pumpfun
+      NEXTAUTH_SECRET: change-me-to-a-strong-secret
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+      NEXT_PUBLIC_SOLANA_NETWORK: mainnet-beta
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      PLATFORM_WALLET_ADDRESS: CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: pumpfun
+      POSTGRES_PASSWORD: pumpfun
+      POSTGRES_DB: pumpfun
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pumpfun"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
