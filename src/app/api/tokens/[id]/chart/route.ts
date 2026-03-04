@@ -4,15 +4,16 @@ import { calculatePrice } from '@/lib/bonding-curve';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = req.nextUrl.searchParams;
     const timeframe = searchParams.get('timeframe') || '5m';
 
     // Fetch candles from DB
     let candles = await prisma.candle.findMany({
-      where: { tokenId: params.id, timeframe },
+      where: { tokenId: id, timeframe },
       orderBy: { timestamp: 'asc' },
       take: 500,
     });
@@ -20,7 +21,7 @@ export async function GET(
     // If no candles, generate synthetic candles from trades
     if (candles.length === 0) {
       const trades = await prisma.trade.findMany({
-        where: { tokenId: params.id },
+        where: { tokenId: id },
         orderBy: { createdAt: 'asc' },
       });
 
@@ -65,7 +66,7 @@ export async function GET(
       }
 
       // Generate flat candle from current token state
-      const token = await prisma.token.findUnique({ where: { id: params.id } });
+      const token = await prisma.token.findUnique({ where: { id } });
       if (token) {
         const price = token.currentPrice || calculatePrice(0);
         const now = Date.now();

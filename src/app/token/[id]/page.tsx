@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 import { Token } from '@/types';
 
 interface TokenPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getToken(id: string): Promise<Token | null> {
@@ -44,7 +44,8 @@ async function getToken(id: string): Promise<Token | null> {
 }
 
 export async function generateMetadata({ params }: TokenPageProps) {
-  const token = await getToken(params.id);
+  const { id } = await params;
+  const token = await getToken(id);
   if (!token) return { title: 'Token Not Found' };
 
   return {
@@ -54,7 +55,8 @@ export async function generateMetadata({ params }: TokenPageProps) {
 }
 
 export default async function TokenPage({ params }: TokenPageProps) {
-  const token = await getToken(params.id);
+  const { id } = await params;
+  const token = await getToken(id);
 
   if (!token) {
     notFound();

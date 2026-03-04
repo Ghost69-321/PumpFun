@@ -6,15 +6,16 @@ import { commentSchema } from '@/lib/validators';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = req.nextUrl.searchParams;
     const page = Number(searchParams.get('page') || 1);
     const pageSize = Number(searchParams.get('pageSize') || 50);
 
     const items = await prisma.comment.findMany({
-      where: { tokenId: params.id, parentId: null },
+      where: { tokenId: id, parentId: null },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -34,7 +35,7 @@ export async function GET(
     });
 
     const total = await prisma.comment.count({
-      where: { tokenId: params.id, parentId: null },
+      where: { tokenId: id, parentId: null },
     });
 
     return NextResponse.json({ items, total });
@@ -46,16 +47,17 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
-    const parsed = commentSchema.safeParse({ ...body, tokenId: params.id });
+    const parsed = commentSchema.safeParse({ ...body, tokenId: id });
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -66,7 +68,7 @@ export async function POST(
 
     const comment = await prisma.comment.create({
       data: {
-        tokenId: params.id,
+        tokenId: id,
         userId: session.user.id,
         content: parsed.data.content,
         parentId: parsed.data.parentId,

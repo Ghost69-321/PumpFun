@@ -8,7 +8,7 @@ import { TokenCard } from '@/components/token/TokenCard';
 import { Token, User } from '@/types';
 
 interface ProfilePageProps {
-  params: { address: string };
+  params: Promise<{ address: string }>;
 }
 
 async function getProfile(address: string) {
@@ -36,20 +36,22 @@ async function getProfile(address: string) {
 }
 
 export async function generateMetadata({ params }: ProfilePageProps) {
+  const { address } = await params;
   return {
-    title: `Profile ${shortenAddress(params.address)} | PumpFun`,
+    title: `Profile ${shortenAddress(address)} | PumpFun`,
   };
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  const user = await getProfile(params.address);
+  const { address } = await params;
+  const user = await getProfile(address);
 
   if (!user) {
     notFound();
   }
 
   const displayName =
-    user.username || shortenAddress(params.address, 6);
+    user.username || shortenAddress(address, 6);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -61,7 +63,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">{displayName}</h1>
-            <p className="text-text-muted text-sm font-mono mt-0.5">{params.address}</p>
+            <p className="text-text-muted text-sm font-mono mt-0.5">{address}</p>
             <p className="text-text-muted text-xs mt-1">
               Joined {formatRelativeTime(user.createdAt)}
             </p>

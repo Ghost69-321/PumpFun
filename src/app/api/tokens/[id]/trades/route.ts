@@ -3,16 +3,17 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = req.nextUrl.searchParams;
     const page = Number(searchParams.get('page') || 1);
     const pageSize = Number(searchParams.get('pageSize') || 20);
 
     const [items, total] = await Promise.all([
       prisma.trade.findMany({
-        where: { tokenId: params.id },
+        where: { tokenId: id },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -22,7 +23,7 @@ export async function GET(
           },
         },
       }),
-      prisma.trade.count({ where: { tokenId: params.id } }),
+      prisma.trade.count({ where: { tokenId: id } }),
     ]);
 
     return NextResponse.json({
