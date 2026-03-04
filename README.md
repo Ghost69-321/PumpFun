@@ -2,7 +2,7 @@
 
 A full-featured Pump.fun-style memecoin launch and trading platform built on Solana. Fair-launch bonding curve mechanics, real-time trading, TradingView-compatible charts, and wallet-based authentication.
 
-![PumpFun Platform](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
+![PumpFun Platform](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
 ![Solana](https://img.shields.io/badge/Solana-Web3.js-9945FF?style=flat-square&logo=solana)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
 ![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=flat-square&logo=prisma)
@@ -28,7 +28,7 @@ A full-featured Pump.fun-style memecoin launch and trading platform built on Sol
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 14 (App Router) |
+| Framework | Next.js 15 (App Router) |
 | Language | TypeScript 5 |
 | Styling | TailwindCSS 3 |
 | Database ORM | Prisma 5 + PostgreSQL |
@@ -280,30 +280,102 @@ export const TOTAL_SUPPLY = 1_000_000_000; // 1 billion
 
 ---
 
-## Deployment
+## 🚀 Deployment
 
 ### Vercel (recommended)
 
-1. Push to GitHub
-2. Import project in [vercel.com](https://vercel.com)
-3. Set environment variables
-4. Deploy
-
-The build will automatically run `prisma generate`. Make sure to run `prisma migrate deploy` against your production database before the first deployment.
+1. Push your repository to GitHub.
+2. Import the project at [vercel.com](https://vercel.com).
+3. Set the required environment variables (see `.env.production.example`):
+   - `DATABASE_URL` — PostgreSQL connection string
+   - `NEXTAUTH_SECRET` — generate with `openssl rand -base64 32`
+   - `NEXTAUTH_URL` — your production URL (e.g. `https://your-domain.com`)
+   - `NEXT_PUBLIC_SOLANA_RPC_URL` — a reliable mainnet RPC (Helius, QuickNode, etc.)
+   - `NEXT_PUBLIC_SOLANA_NETWORK` — `mainnet-beta`
+   - `PLATFORM_WALLET_ADDRESS` — `CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw`
+4. Deploy. The build command in `vercel.json` runs `prisma generate` automatically.
+5. Run migrations against your production database:
+   ```bash
+   npx prisma migrate deploy
+   ```
 
 ### Docker
 
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npx prisma generate
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
+```bash
+# Start the platform with PostgreSQL and Redis
+docker-compose up -d
+
+# Run database migrations
+docker-compose exec app npx prisma migrate deploy
 ```
+
+Edit `docker-compose.yml` to set a strong `NEXTAUTH_SECRET` and your production domain.
+
+### Manual VPS (DigitalOcean, AWS EC2, etc.)
+
+1. Install Node.js 20 and PostgreSQL on your server.
+2. Clone the repository and install dependencies:
+   ```bash
+   git clone https://github.com/your-org/pumpfun.git
+   cd pumpfun
+   npm ci
+   ```
+3. Copy and edit the production env file:
+   ```bash
+   cp .env.production.example .env
+   # Edit .env with your production values
+   ```
+4. Generate Prisma client and run migrations:
+   ```bash
+   npx prisma generate
+   npx prisma migrate deploy
+   ```
+5. Build and start:
+   ```bash
+   npm run build
+   npm start
+   ```
+   For process management use PM2:
+   ```bash
+   npm install -g pm2
+   pm2 start npm --name pumpfun -- start
+   ```
+6. Set up Nginx as a reverse proxy:
+   ```nginx
+   server {
+       listen 80;
+       server_name your-domain.com;
+
+       location / {
+           proxy_pass http://127.0.0.1:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+       }
+   }
+   ```
+7. Obtain an SSL certificate with Let's Encrypt:
+   ```bash
+   sudo apt install certbot python3-certbot-nginx
+   sudo certbot --nginx -d your-domain.com
+   ```
+
+---
+
+## ✅ Production Launch Checklist
+
+- [ ] Set `DATABASE_URL` to production PostgreSQL
+- [ ] Set `NEXTAUTH_SECRET` to a strong random string
+- [ ] Set `NEXTAUTH_URL` to your production domain
+- [ ] Set `SOLANA_RPC_URL` to a reliable mainnet RPC (Helius, QuickNode, etc.)
+- [ ] Verify `PLATFORM_WALLET_ADDRESS` is `CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw`
+- [ ] Run database migrations (`npx prisma migrate deploy`)
+- [ ] Test wallet connection on mainnet
+- [ ] Test token creation flow
+- [ ] Test buy/sell flow and verify fees arrive at treasury wallet
+- [ ] Set up monitoring and error tracking
 
 ---
 

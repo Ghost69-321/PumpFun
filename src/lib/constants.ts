@@ -2,9 +2,14 @@ export const APP_NAME = 'PumpFun';
 export const APP_DESCRIPTION = 'Launch and trade memecoins on Solana';
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-export const SOLANA_NETWORK = process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'devnet';
+// Treasury wallet — all platform fees are sent here
+export const TREASURY_WALLET = 'CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw';
+export const PLATFORM_WALLET_ADDRESS = TREASURY_WALLET;
+export const PLATFORM_FEE_RATE = 0.01; // 1%
+
+export const SOLANA_NETWORK = process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'mainnet-beta';
 export const SOLANA_RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
 // Token constants
 export const TOTAL_SUPPLY = 1_000_000_000; // 1 billion tokens
