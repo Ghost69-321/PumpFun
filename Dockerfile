@@ -7,6 +7,7 @@ RUN npm ci
 # Stage 2: Build the application
 FROM node:20-alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN mkdir -p public
@@ -19,6 +20,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+RUN apk add --no-cache openssl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
