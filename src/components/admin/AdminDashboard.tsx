@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Token, Trade } from '@/types';
+import { Trade } from '@/types';
 import { Card, CardBody, CardHeader } from '@/components/ui/card';
-import { formatNumber, formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 interface AdminStats {

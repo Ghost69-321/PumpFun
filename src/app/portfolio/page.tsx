@@ -7,7 +7,6 @@ import { PortfolioOverview } from '@/components/portfolio/PortfolioOverview';
 import { HoldingsList } from '@/components/portfolio/HoldingsList';
 import { TransactionHistory } from '@/components/portfolio/TransactionHistory';
 import { Tabs, TabList, TabTrigger, TabPanel } from '@/components/ui/tabs';
-import Link from 'next/link';
 
 export default function PortfolioPage() {
   const { data: session } = useSession();

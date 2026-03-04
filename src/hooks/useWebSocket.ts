@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { SSEEvent } from '@/types';
-
 type EventHandler = (data: unknown) => void;
 
 interface UseSSEOptions {

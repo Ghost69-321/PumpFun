@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { TokenModeration } from '@/components/admin/TokenModeration';
 import { Tabs, TabList, TabTrigger, TabPanel } from '@/components/ui/tabs';

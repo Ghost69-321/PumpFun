@@ -12,7 +12,7 @@ export async function GET(
     const timeframe = searchParams.get('timeframe') || '5m';
 
     // Fetch candles from DB
-    let candles = await prisma.candle.findMany({
+    const candles = await prisma.candle.findMany({
       where: { tokenId: id, timeframe },
       orderBy: { timestamp: 'asc' },
       take: 500,

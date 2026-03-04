@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { PortfolioStats } from '@/types';
-import { formatNumber, formatPercent, formatSol } from '@/lib/utils';
+import { formatPercent, formatSol } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 interface PortfolioOverviewProps {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { PortfolioStats, HoldingWithValue } from '@/types';
+import { PortfolioStats } from '@/types';
 
 export function usePortfolio() {
   const [stats, setStats] = useState<PortfolioStats | null>(null);

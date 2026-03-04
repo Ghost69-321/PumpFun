@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Trade } from '@/types';
-import { formatRelativeTime, formatNumber, formatPrice, shortenAddress } from '@/lib/utils';
+import { formatRelativeTime, formatNumber } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { TradeRowSkeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
