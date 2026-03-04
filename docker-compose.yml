@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://pumpfun:pumpfun_password@db:5432/pumpfun
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-secret}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+      SOLANA_NETWORK: ${SOLANA_NETWORK:-mainnet-beta}
+      NEXT_PUBLIC_SOLANA_RPC_URL: ${NEXT_PUBLIC_SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+      NEXT_PUBLIC_SOLANA_NETWORK: ${NEXT_PUBLIC_SOLANA_NETWORK:-mainnet-beta}
+      PLATFORM_WALLET_ADDRESS: CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw
+      PLATFORM_FEE_PERCENT: "1"
+      GRADUATION_THRESHOLD_SOL: "85"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/tokens"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: pumpfun
+      POSTGRES_PASSWORD: pumpfun_password
+      POSTGRES_DB: pumpfun
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pumpfun -d pumpfun"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
