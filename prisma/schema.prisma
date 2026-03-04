@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  walletAddress String?   @unique
+  email         String?   @unique
+  username      String?   @unique
+  avatar        String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tokens        Token[]
+  trades        Trade[]
+  comments      Comment[]
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Token {
+  id                String   @id @default(cuid())
+  mintAddress       String   @unique
+  name              String
+  symbol            String
+  description       String?  @db.Text
+  imageUrl          String?
+  metadataUri       String?
+  twitterUrl        String?
+  telegramUrl       String?
+  websiteUrl        String?
+  creatorId         String
+  creator           User     @relation(fields: [creatorId], references: [id])
+  initialSupply     BigInt   @default(1000000000000000)
+  currentSupply     BigInt   @default(0)
+  reserveBalance    Float    @default(0)
+  marketCap         Float    @default(0)
+  price             Float    @default(0)
+  volume24h         Float    @default(0)
+  graduated         Boolean  @default(false)
+  graduatedAt       DateTime?
+  graduationTxHash  String?
+  isActive          Boolean  @default(true)
+  isFlagged         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  trades            Trade[]
+  comments          Comment[]
+  candlesticks      Candlestick[]
+  holders           TokenHolder[]
+
+  @@map("tokens")
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  tokenId     String
+  token       Token    @relation(fields: [tokenId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        TradeType
+  solAmount   Float
+  tokenAmount BigInt
+  price       Float
+  fee         Float    @default(0)
+  txHash      String?  @unique
+  createdAt   DateTime @default(now())
+
+  @@map("trades")
+}
+
+enum TradeType {
+  BUY
+  SELL
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  tokenId   String
+  token     Token    @relation(fields: [tokenId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("comments")
+}
+
+model Candlestick {
+  id        String   @id @default(cuid())
+  tokenId   String
+  token     Token    @relation(fields: [tokenId], references: [id])
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Float
+  timestamp DateTime
+  timeframe String   @default("1m")
+
+  @@unique([tokenId, timestamp, timeframe])
+  @@map("candlesticks")
+}
+
+model TokenHolder {
+  id          String   @id @default(cuid())
+  tokenId     String
+  token       Token    @relation(fields: [tokenId], references: [id])
+  address     String
+  balance     BigInt
+  percentage  Float
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tokenId, address])
+  @@map("token_holders")
+}
