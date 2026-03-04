@@ -4,13 +4,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://pumpfun:pumpfun@db:5432/pumpfun
+      DATABASE_URL: ${DATABASE_URL:-postgresql://pumpfun:${POSTGRES_PASSWORD:-pumpfun}@db:5432/pumpfun}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET to a strong random value}
-      NEXTAUTH_URL: http://localhost:3000
-      NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
-      NEXT_PUBLIC_SOLANA_NETWORK: mainnet-beta
-      NEXT_PUBLIC_APP_URL: http://localhost:3000
-      PLATFORM_WALLET_ADDRESS: CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXT_PUBLIC_SOLANA_RPC_URL: ${NEXT_PUBLIC_SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+      NEXT_PUBLIC_SOLANA_NETWORK: ${NEXT_PUBLIC_SOLANA_NETWORK:-mainnet-beta}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      PLATFORM_WALLET_ADDRESS: ${PLATFORM_WALLET_ADDRESS:-CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw}
+      PLATFORM_FEE_PERCENT: ${PLATFORM_FEE_PERCENT:-1}
+      GRADUATION_THRESHOLD_SOL: ${GRADUATION_THRESHOLD_SOL:-85}
+      NEXT_PUBLIC_PLATFORM_FEE_BPS: ${NEXT_PUBLIC_PLATFORM_FEE_BPS:-100}
+      UPLOAD_DIR: ${UPLOAD_DIR:-./public/uploads}
     depends_on:
       db:
         condition: service_healthy
@@ -21,16 +25,15 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      # IMPORTANT: Change these credentials for production
-      POSTGRES_USER: pumpfun
-      POSTGRES_PASSWORD: pumpfun
-      POSTGRES_DB: pumpfun
+      POSTGRES_USER: ${POSTGRES_USER:-pumpfun}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD to a strong random value}
+      POSTGRES_DB: ${POSTGRES_DB:-pumpfun}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # Port 5432 is intentionally NOT exposed to the host.
+    # Connect via: docker compose exec db psql -U pumpfun
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pumpfun"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pumpfun}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,8 +41,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    # Port 6379 is intentionally NOT exposed to the host.
     volumes:
       - redisdata:/data
     healthcheck:
