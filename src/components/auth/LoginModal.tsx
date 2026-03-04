@@ -18,14 +18,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   const { setVisible } = useWalletModal();
   const { toast } = useToast();
 
-  // When wallet connects, sign in with NextAuth
-  useEffect(() => {
-    if (connected && publicKey && open) {
-      handleSignIn();
-    }
-  }, [connected, publicKey, open]);
-
-  const handleSignIn = async () => {
+  const handleSignIn = React.useCallback(async () => {
     if (!publicKey) return;
 
     try {
@@ -55,7 +48,14 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
         description: 'Something went wrong. Please try again.',
       });
     }
-  };
+  }, [publicKey, toast, onClose]);
+
+  // When wallet connects, sign in with NextAuth
+  useEffect(() => {
+    if (connected && publicKey && open) {
+      handleSignIn();
+    }
+  }, [connected, publicKey, open, handleSignIn]);
 
   const handleConnectWallet = () => {
     setVisible(true);

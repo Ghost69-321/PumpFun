@@ -1,30 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SSE_HEARTBEAT_INTERVAL } from '@/lib/constants';
+import { addSSEClient, removeSSEClient } from '@/lib/sse-clients';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-// Global event emitter for SSE (in production, use Redis pub/sub)
-const clients = new Set<ReadableStreamDefaultController>();
-
-function broadcastToClients(event: string, data: unknown) {
-  const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-  const encoder = new TextEncoder();
-  clients.forEach((controller) => {
-    try {
-      controller.enqueue(encoder.encode(message));
-    } catch {
-      clients.delete(controller);
-    }
-  });
-}
 
 export async function GET(_req: NextRequest) {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     start(controller) {
-      clients.add(controller);
+      addSSEClient(controller);
 
       // Send initial connection event
       controller.enqueue(
@@ -39,18 +25,18 @@ export async function GET(_req: NextRequest) {
           );
         } catch {
           clearInterval(heartbeatInterval);
-          clients.delete(controller);
+          removeSSEClient(controller);
         }
       }, SSE_HEARTBEAT_INTERVAL);
 
-      // Cleanup on close
+      // Cleanup on stream close
       return () => {
         clearInterval(heartbeatInterval);
-        clients.delete(controller);
+        removeSSEClient(controller);
       };
     },
     cancel(controller) {
-      clients.delete(controller);
+      removeSSEClient(controller);
     },
   });
 
@@ -63,3 +49,4 @@ export async function GET(_req: NextRequest) {
     },
   });
 }
+

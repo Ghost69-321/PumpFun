@@ -11,6 +11,7 @@ import {
   GRADUATION_SOL,
 } from '@/lib/bonding-curve';
 import { TOTAL_SUPPLY } from '@/lib/constants';
+import { broadcastSSEEvent } from '@/lib/sse-clients';
 
 export async function POST(req: NextRequest) {
   try {
@@ -204,6 +205,25 @@ export async function POST(req: NextRequest) {
       }
 
       return { trade, token: updatedToken };
+    });
+
+    // Broadcast trade and price update events to SSE clients
+    broadcastSSEEvent('trade', {
+      tokenId,
+      tradeType: type,
+      amountSol: actualAmountSol,
+      amountTokens: actualAmountTokens,
+      price: actualPrice,
+      user: session.user.walletAddress,
+      newMarketCap,
+      newPrice,
+    });
+    broadcastSSEEvent('price_update', {
+      tokenId,
+      newPrice,
+      newMarketCap,
+      solRaised: Math.max(0, type === 'BUY' ? token.solRaised + actualAmountSol : token.solRaised - actualAmountSol),
+      circulatingSupply: newCirculatingSupply,
     });
 
     return NextResponse.json({

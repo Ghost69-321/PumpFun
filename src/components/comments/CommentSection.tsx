@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Comment } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ export function CommentSection({ tokenId }: CommentSectionProps) {
   const [content, setContent] = useState('');
   const [posting, setPosting] = useState(false);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const res = await fetch(`/api/tokens/${tokenId}/comments`);
       const data = await res.json();
@@ -30,11 +30,11 @@ export function CommentSection({ tokenId }: CommentSectionProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tokenId]);
 
   useEffect(() => {
     fetchComments();
-  }, [tokenId]);
+  }, [fetchComments]);
 
   const handlePost = async () => {
     if (!content.trim()) return;

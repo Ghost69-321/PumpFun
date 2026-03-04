@@ -129,36 +129,52 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // If initial buy amount provided, execute a buy
+    // If initial buy amount provided, execute the buy directly
     if (initialBuyAmount && initialBuyAmount > 0) {
-      // Simulate initial buy via trade endpoint logic
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/trade`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: req.headers.get('cookie') || '',
-        },
-        body: JSON.stringify({
-          tokenId: token.id,
-          type: 'BUY',
-          amountSol: initialBuyAmount,
-          slippage: 10,
-        }),
-      });
-    }
+      const { getBuyQuote, calculatePrice: calcPrice, calculateMarketCap: calcMC, GRADUATION_SOL } = await import('@/lib/bonding-curve');
+      const quote = getBuyQuote(0, initialBuyAmount);
 
-    // Broadcast new token event
-    broadcastSSE('new_token', { tokenId: token.id, name, ticker });
+      if (quote.tokensOut > 0) {
+        const newSupply = quote.tokensOut;
+        const newPrice = calcPrice(newSupply);
+        const newMarketCap = calcMC(newSupply, TOTAL_SUPPLY);
+
+        await prisma.$transaction([
+          prisma.trade.create({
+            data: {
+              tokenId: token.id,
+              userId: session.user.id,
+              type: 'BUY',
+              amountTokens: quote.tokensOut,
+              amountSol: initialBuyAmount,
+              price: newPrice,
+            },
+          }),
+          prisma.token.update({
+            where: { id: token.id },
+            data: {
+              currentPrice: newPrice,
+              marketCap: newMarketCap,
+              circulatingSupply: newSupply,
+              solRaised: initialBuyAmount,
+              status: initialBuyAmount >= GRADUATION_SOL ? 'GRADUATED' : 'ACTIVE',
+            },
+          }),
+          prisma.holding.create({
+            data: {
+              userId: session.user.id,
+              tokenId: token.id,
+              amount: quote.tokensOut,
+              averageBuyPrice: newPrice,
+            },
+          }),
+        ]);
+      }
+    }
 
     return NextResponse.json(token, { status: 201 });
   } catch (error) {
     console.error('POST /api/tokens error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
-
-// Simple SSE broadcast (in production, use Redis pub/sub)
-function broadcastSSE(event: string, data: unknown) {
-  // This is a no-op in the route handler; the SSE endpoint polls for updates
-  console.log(`SSE event: ${event}`, data);
 }
