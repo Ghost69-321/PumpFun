@@ -9,6 +9,6 @@
     "SOLANA_RPC_URL": "@solana-rpc-url",
     "NEXT_PUBLIC_SOLANA_RPC_URL": "@next-public-solana-rpc-url",
     "NEXT_PUBLIC_SOLANA_NETWORK": "mainnet-beta",
-    "PLATFORM_WALLET_ADDRESS": "CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw"
+    "PLATFORM_WALLET_ADDRESS": "@platform-wallet-address"
   }
 }

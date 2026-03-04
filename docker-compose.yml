@@ -5,7 +5,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://pumpfun:pumpfun@db:5432/pumpfun
-      NEXTAUTH_SECRET: change-me-to-a-strong-secret
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET to a strong random value}
       NEXTAUTH_URL: http://localhost:3000
       NEXT_PUBLIC_SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
       NEXT_PUBLIC_SOLANA_NETWORK: mainnet-beta
@@ -21,6 +21,7 @@ services:
   db:
     image: postgres:15-alpine
     environment:
+      # IMPORTANT: Change these credentials for production
       POSTGRES_USER: pumpfun
       POSTGRES_PASSWORD: pumpfun
       POSTGRES_DB: pumpfun

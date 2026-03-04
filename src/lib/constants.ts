@@ -4,7 +4,7 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000
 
 // Treasury wallet — all platform fees are sent here
 export const TREASURY_WALLET = 'CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw';
-export const PLATFORM_WALLET_ADDRESS = 'CfyjfkdfVchdvtKyPbBxBoScfSUPBVMwnGbYeXBs5uKw';
+export const PLATFORM_WALLET_ADDRESS = TREASURY_WALLET;
 export const PLATFORM_FEE_RATE = 0.01; // 1%
 
 export const SOLANA_NETWORK = process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'mainnet-beta';
