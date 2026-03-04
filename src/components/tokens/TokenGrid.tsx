@@ -25,7 +25,7 @@ export function TokenGrid() {
   async function fetchTokens(reset = false) {
     setLoading(true);
     try {
-      const currentPage = reset ? 1 : page;
+      const currentPage = reset ? 1 : page + 1;
       const res = await fetch(`/api/tokens?sort=${sort}&search=${search}&page=${currentPage}`);
       const data = await res.json();
       
@@ -34,6 +34,7 @@ export function TokenGrid() {
         setPage(1);
       } else {
         setTokens(prev => [...prev, ...(data.items || [])]);
+        setPage(currentPage);
       }
       setHasMore(data.hasMore);
     } catch (error) {
@@ -92,7 +93,7 @@ export function TokenGrid() {
       {hasMore && (
         <div className="mt-8 text-center">
           <button
-            onClick={() => { setPage(p => p + 1); fetchTokens(); }}
+            onClick={() => fetchTokens()}
             className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
           >
             Load More

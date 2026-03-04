@@ -128,7 +128,13 @@ export function TradePanel({ token, onTradeComplete }: TradePanelProps) {
           </div>
           <div className="flex justify-between text-xs">
             <span className="text-gray-500">Platform fee (1%)</span>
-            <span className="text-yellow-400">{(parseFloat(amount) * PLATFORM_FEE_RATE).toFixed(4)} {tradeType === 'BUY' ? 'SOL' : token.symbol}</span>
+            <span className="text-yellow-400">
+              {tradeType === 'BUY'
+                ? `${(parseFloat(amount) * PLATFORM_FEE_RATE).toFixed(4)} SOL`
+                : sellEstimate
+                ? `${(sellEstimate.solAmount * PLATFORM_FEE_RATE).toFixed(4)} SOL`
+                : '-'}
+            </span>
           </div>
           <div className="flex justify-between text-xs">
             <span className="text-gray-500">Price impact</span>
