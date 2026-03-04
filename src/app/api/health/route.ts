@@ -6,13 +6,13 @@ const startTime = Date.now();
 export async function GET() {
   const status: {
     status: string;
-    uptime: number;
+    instanceUptime: number;
     timestamp: string;
     database: string;
     version: string;
   } = {
     status: 'ok',
-    uptime: Math.floor((Date.now() - startTime) / 1000),
+    instanceUptime: Math.floor((Date.now() - startTime) / 1000),
     timestamp: new Date().toISOString(),
     database: 'unknown',
     version: process.env.npm_package_version || '0.1.0',

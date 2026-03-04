@@ -20,6 +20,8 @@ const nextConfig = {
   },
   serverExternalPackages: ['@prisma/client', 'prisma'],
   async headers() {
+    // Only enable HSTS in production
+    if (process.env.NODE_ENV !== 'production') return [];
     return [
       {
         source: '/(.*)',
